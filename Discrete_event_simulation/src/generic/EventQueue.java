@@ -21,6 +21,7 @@ public class EventQueue {
 
 	public void processEvents()
 	{
+		System.out.println("Hello im here\n");	
 		while(queue.isEmpty() == false && queue.peek().getEventTime() <= Clock.getCurrentTime())
 		{
 			Event event = queue.poll();

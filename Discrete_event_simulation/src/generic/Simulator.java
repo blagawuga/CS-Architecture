@@ -26,9 +26,6 @@ public class Simulator {
 		simulationComplete = false;
 	}
 	
-	public Simulator() {
-		eventQueue = new EventQueue();
-	}
 	
 	static void loadProgram(String assemblyProgramFile)
 	{
@@ -89,6 +86,8 @@ public class Simulator {
 	
 	public static void simulate()
 	{
+		System.out.println("constructor simulator");
+		eventQueue = new EventQueue();
 		
 		while(simulationComplete == false)
 		{
@@ -105,8 +104,8 @@ public class Simulator {
 			cycles++;
 			System.out.println("WHILE LOOP KHATAM");
 			System.out.println("---------------------------------------------------------------------------------");
-//			if (cycles==50)
-//				break;
+			if (cycles==500)
+				break;
 		}
 		System.out.println("Number of cycles "+cycles);
 		// TODO

@@ -76,7 +76,7 @@ public class RegisterWrite {
 					IF_EnableLatch.setIF_enable(true);
 				}
 			}
-			System.out.println("end PC in RW\\ "+containingProcessor.getRegisterFile().getProgramCounter()+"//");
+			//System.out.println("end PC in RW\\ "+containingProcessor.getRegisterFile().getProgramCounter()+"//");
 			System.out.println("-----------RW STAGE GAYA--------------");
 			
 	}
