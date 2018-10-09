@@ -8,6 +8,7 @@ public class IF_EnableLatchType {
 	public IF_EnableLatchType()
 	{
 		IF_enable = true;
+		IF_busy=false;
 	}
 
 	public boolean isIF_enable() {

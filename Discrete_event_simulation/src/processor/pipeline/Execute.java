@@ -1,9 +1,11 @@
 package processor.pipeline;
-
-import generic.Simulator;
+import configuration.Configuration;
+import processor.Clock;
+import processor.Processor;
+import generic.*;
 import processor.Processor;
 
-public class Execute {
+public class Execute implements Element{
 	Processor containingProcessor;
 	OF_EX_LatchType OF_EX_Latch;
 	EX_MA_LatchType EX_MA_Latch;
@@ -22,8 +24,13 @@ public class Execute {
 	
 	public void performEX()
 	{
+		
 		if(OF_EX_Latch.isEX_enable())
 		{	
+			if(OF_EX_Latch.isEX_busy()) {
+				return;
+			}
+			
 			Simulator.instructions_int++;
 			System.out.println("-----------EX STAGE AAYA--------------");
 			
@@ -53,30 +60,116 @@ public class Execute {
 			System.out.println("rs1val->"+rs1val);
 			System.out.println("rs2val->"+rs2val);
 			System.out.println("rdval->"+rdval);
+			
 			switch(operation) {
 			
 			case "add":
-				EX_MA_Latch.setalu_Result(rs1val+rs2val);
+				
+				Simulator.getEventQueue().addEvent(
+						new ExecutionCompleteEvent (
+									Clock.getCurrentTime()+Configuration.ALU_latency,
+									this,
+									containingProcessor.getEXUnit(),
+									rs1,
+									rs2,
+									rd,
+									imm,
+									rs1val+rs2val,//alu_Result
+									opcode
+								)					
+				);
+				//EX_MA_Latch.setalu_Result(rs1val+rs2val);
 				break;
 				
 			case "addi":
-				EX_MA_Latch.setalu_Result(rs1val+imm);
+				
+				Simulator.getEventQueue().addEvent(
+						new ExecutionCompleteEvent (
+									Clock.getCurrentTime()+Configuration.ALU_latency,
+									this,
+									containingProcessor.getEXUnit(),
+									rs1,
+									rs2,
+									rd,
+									imm,
+									rs1val+imm,//alu_Result
+									opcode
+								)					
+				);
+				
+				//EX_MA_Latch.setalu_Result(rs1val+imm);
 				break;
 				
 			case "sub":
-				EX_MA_Latch.setalu_Result(rs1val-rs2val);
+				
+				Simulator.getEventQueue().addEvent(
+						new ExecutionCompleteEvent (
+									Clock.getCurrentTime()+Configuration.ALU_latency,
+									this,
+									containingProcessor.getEXUnit(),
+									rs1,
+									rs2,
+									rd,
+									imm,
+									rs1val-rs2val,//alu_Result
+									opcode
+								)					
+				);
+				//EX_MA_Latch.setalu_Result(rs1val-rs2val);
 				break;
 				
 			case "subi":
-				EX_MA_Latch.setalu_Result(rs1val-imm);
+				
+				Simulator.getEventQueue().addEvent(
+						new ExecutionCompleteEvent (
+									Clock.getCurrentTime()+Configuration.ALU_latency,
+									this,
+									containingProcessor.getEXUnit(),
+									rs1,
+									rs2,
+									rd,
+									imm,
+									rs1val-imm,//alu_Result
+									opcode
+								)					
+				);
+				//EX_MA_Latch.setalu_Result(rs1val-imm);
 				break;
 				
 			case "mul":
-				EX_MA_Latch.setalu_Result(rs1val*rs2val);
+				
+				Simulator.getEventQueue().addEvent(
+						new ExecutionCompleteEvent (
+									Clock.getCurrentTime()+Configuration.multiplier_latency,
+									this,
+									containingProcessor.getEXUnit(),
+									rs1,
+									rs2,
+									rd,
+									imm,
+									rs1val*rs2val,//alu_Result
+									opcode
+								)					
+				);
+				//EX_MA_Latch.setalu_Result(rs1val*rs2val);
 				break;
 				
 			case "muli":
-				EX_MA_Latch.setalu_Result(rs1val*imm);
+				
+				Simulator.getEventQueue().addEvent(
+						new ExecutionCompleteEvent (
+									Clock.getCurrentTime()+Configuration.multiplier_latency,
+									this,
+									containingProcessor.getEXUnit(),
+									rs1,
+									rs2,
+									rd,
+									imm,
+									rs1val*imm,//alu_Result
+									opcode
+								)					
+				);
+				//EX_MA_Latch.setalu_Result(rs1val*imm);
 				break;
 				
 			case "div":
@@ -261,15 +354,7 @@ public class Execute {
 			}
 			System.out.println(containingProcessor.getRegisterFile().getContentsAsString());
 			System.out.println("aluresult->"+EX_MA_Latch.getalu_Result());
-			OF_EX_Latch.setEX_enable(false);
-			
-			EX_MA_Latch.set_imm(OF_EX_Latch.get_imm());//transfer the values from of ex latch to ex ma latch
-			EX_MA_Latch.set_op(OF_EX_Latch.getOpType());
-			EX_MA_Latch.set_rd(OF_EX_Latch.get_rd());
-			EX_MA_Latch.set_rs1(OF_EX_Latch.get_rs1());
-			EX_MA_Latch.set_rs2(OF_EX_Latch.get_rs2());
-			
-			
+					
 			
 		}
 		if(containingProcessor.getRegisterFile().getWaitCounter()>=0) { // If there's order to wait, we'll disable EX
@@ -282,4 +367,28 @@ public class Execute {
 		EX_MA_Latch.setend_PC(OF_EX_Latch.getend_PC());
 		System.out.println("-----------EX STAGE GAYA--------------");
 	}
+	
+	@Override
+	public void handleEvent(Event e)
+	{
+		if(OF_EX_Latch.isEX_busy())
+		{
+			e.setEventTime(Clock.getCurrentTime() + 1);
+			Simulator.getEventQueue().addEvent(e);
+		}
+		else
+		{
+			ExecutionCompleteEvent event = (ExecutionCompleteEvent) e;
+			
+			OF_EX_Latch.setEX_enable(false);
+			EX_MA_Latch.set_imm(event.get_imm());//transfer the values from of ex latch to ex ma latch
+			EX_MA_Latch.set_op(event.getOpType());
+			EX_MA_Latch.set_rd(event.get_rd());
+			EX_MA_Latch.set_rs1(event.get_rs1());
+			EX_MA_Latch.set_rs2(event.get_rs2());
+			
+		}
+	}
+
+	
 }

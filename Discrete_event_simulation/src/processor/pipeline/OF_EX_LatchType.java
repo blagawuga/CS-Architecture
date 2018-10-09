@@ -1,7 +1,7 @@
 package processor.pipeline;
 
 public class OF_EX_LatchType {
-	
+	boolean EX_busy;
 	boolean EX_enable;
 	private int rs1;
 	private int rs2;
@@ -19,8 +19,17 @@ public class OF_EX_LatchType {
 	public OF_EX_LatchType()
 	{
 		EX_enable = false;
+		EX_busy=false;
 	}
 
+	public void setEX_busy(boolean a) {
+		this.EX_busy = a;
+	}
+	
+	public boolean isEX_busy() {
+		return this.EX_busy;
+	}
+	
 	public boolean isEX_enable() {
 		return EX_enable;
 	}

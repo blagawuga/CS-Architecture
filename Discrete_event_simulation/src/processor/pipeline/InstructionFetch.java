@@ -60,31 +60,7 @@ public class InstructionFetch implements Element {
 			IF_OF_Latch.setOF_enable(true);
 			IF_EnableLatch.setIF_enable(false);
 		}
-			
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
