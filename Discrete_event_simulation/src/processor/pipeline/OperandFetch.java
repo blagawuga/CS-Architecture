@@ -34,6 +34,14 @@ public class OperandFetch {
 	{
 		if(IF_OF_Latch.isOF_enable())
 		{
+			if(OF_EX_Latch.isEX_busy())
+			{
+				IF_OF_Latch.setOF_busy(true);
+				return;
+			}
+			
+			IF_OF_Latch.setOF_busy(false);
+			
 			System.out.println("-----------OF STAGE AAYA--------------");
 			
 			

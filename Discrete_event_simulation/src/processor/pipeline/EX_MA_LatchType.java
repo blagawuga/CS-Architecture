@@ -8,6 +8,7 @@ public class EX_MA_LatchType {
 	private int rd;
 	private int imm;
 	private String opcode;
+	private boolean MA_busy;
 	int end_PC;
 	public void setend_PC(int end_PC) {
 		this.end_PC=end_PC;
@@ -17,8 +18,18 @@ public class EX_MA_LatchType {
 	}
 	public EX_MA_LatchType()
 	{
+		MA_busy = false;
 		MA_enable = false;
 	}
+	
+	public boolean isMA_busy() {
+		return this.MA_busy;
+	}
+	
+	public void set_isMA_busy(boolean a) {
+		this.MA_busy = a;
+	}
+	
 	public void setalu_Result(int alu_Result) {
 		this.alu_Result=alu_Result;
 	}
