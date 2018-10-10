@@ -52,6 +52,11 @@ public class MainMemory implements Element {
 						)
 				);
 		}
+		else if(e.getEventType() == EventType.MemoryWrite)
+		{
+			MemoryWriteEvent event = (MemoryWriteEvent) e;
+			setWord(event.getAddressToWriteTo(), event.getValue());
+		}
 	}
 	
 }

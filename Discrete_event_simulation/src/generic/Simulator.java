@@ -5,7 +5,7 @@ import java.nio.file.*;
 import processor.Clock;
 import processor.Processor;
 import processor.pipeline.*;
-
+import java.util.*;
 public class Simulator {
 		
 	static Processor processor;
@@ -24,11 +24,9 @@ public class Simulator {
 		Simulator.processor = p;
 		loadProgram(assemblyProgramFile);
 		simulationComplete = false;
-	}
-	
-	public Simulator() {
 		eventQueue = new EventQueue();
 	}
+	
 	
 	static void loadProgram(String assemblyProgramFile)
 	{
@@ -86,6 +84,7 @@ public class Simulator {
 	public static EventQueue getEventQueue() {
 		return eventQueue;
 	}
+
 	
 	public static void simulate()
 	{
@@ -94,19 +93,55 @@ public class Simulator {
 		{
 			
 			System.out.println("---------------------------------------------------------------------------------");
-			System.out.println("WHILE LOOP START");
+			System.out.println("WHILE LOOP START----~~~~ CYCLE NUMBER = "+cycles+" \n\n");
+			
 			processor.getRWUnit().performRW();
+			
+			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
+			Simulator.getEventQueue().printElements();
+			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END**********************************\n");
+			
 			processor.getMAUnit().performMA();
+			
+			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
+			Simulator.getEventQueue().printElements();
+			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END**********************************\n");
+			
+			
 			processor.getEXUnit().performEX();
+			
+			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
+			Simulator.getEventQueue().printElements();
+			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END********************************\n");
+			
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~CALLING PROCESS EVENTS START~~~~~~~~~~~~~~~~~~~~~~\n");
 			eventQueue.processEvents();
+			System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~CALLING PROCESS EVENTS END~~~~~~~~~~~~~~~~~~~~~~\n");
+			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
+			Simulator.getEventQueue().printElements();
+			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END********************************\n");
+			
+			
 			processor.getOFUnit().performOF();
+			
+			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
+			Simulator.getEventQueue().printElements();
+			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END********************************\n");
+			
+			
 			processor.getIFUnit().performIF();
+			
+			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
+			Simulator.getEventQueue().printElements();
+			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END********************************\n");
+			
+			
 			Clock.incrementClock();
 			cycles++;
 			System.out.println("WHILE LOOP KHATAM");
-			System.out.println("---------------------------------------------------------------------------------");
-//			if (cycles==50)
-//				break;
+			System.out.println("---------------------------------------------------------------------------------\n\n");
+			if (cycles==150)
+				break;
 		}
 		System.out.println("Number of cycles "+cycles);
 		// TODO
