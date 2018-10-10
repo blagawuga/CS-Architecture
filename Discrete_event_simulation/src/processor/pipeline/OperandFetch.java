@@ -15,15 +15,17 @@ public class OperandFetch {
 	OF_EX_LatchType OF_EX_Latch;
 	EX_MA_LatchType EX_MA_Latch;
 	MA_RW_LatchType MA_RW_Latch;
+	IF_EnableLatchType IF_EnableLatch;
 	
 	
-	public OperandFetch(Processor containingProcessor, IF_OF_LatchType iF_OF_Latch, OF_EX_LatchType oF_EX_Latch, EX_MA_LatchType eX_MA_Latch, MA_RW_LatchType mA_RW_Latch)
+	public OperandFetch(Processor containingProcessor, IF_OF_LatchType iF_OF_Latch, OF_EX_LatchType oF_EX_Latch, EX_MA_LatchType eX_MA_Latch, MA_RW_LatchType mA_RW_Latch, IF_EnableLatchType iF_EnableLatch)
 	{
 		this.containingProcessor = containingProcessor;
 		this.IF_OF_Latch = iF_OF_Latch;
 		this.OF_EX_Latch = oF_EX_Latch;
 		this.EX_MA_Latch = eX_MA_Latch;
 		this.MA_RW_Latch = mA_RW_Latch;
+		this.IF_EnableLatch = iF_EnableLatch;
 	}
 	
 	public int calculate_value(String s)
@@ -34,22 +36,18 @@ public class OperandFetch {
 	
 	public void performOF()
 	{
-		if(Clock.getCurrentTime() == 86) {
-			operation_functions op = new operation_functions();
-			String opcode = EX_MA_Latch.getOpType();
-			String operation = op.getOperation(opcode);
-			System.out.println(operation+" IS THE MFKING OPERATION ON CYCLE 86 AND EX MA IS -> "+ EX_MA_Latch.isMA_enable());
-		}
+		
 		
 		
 		if(IF_OF_Latch.isOF_enable())
 		{
 			
-			if(IF_OF_Latch.isOF_busy() || OF_EX_Latch.isEX_busy()) {
-				IF_OF_Latch.setOF_busy(true);
-				System.out.println("-----------OF STAGE IS BUSY OR EX STAGE IS BUSY--------------");
+			if(OF_EX_Latch.isEX_busy()) {
+				System.out.println("-----------OF STAGE IS BUSY--------------");
 				return;
 			}
+			
+			
 			
 			System.out.println("-----------OF STAGE AAYA--------------");
 			
@@ -61,10 +59,10 @@ public class OperandFetch {
 			int rs2 = 0;
 			int rd = 0;
 			int imm = 0;
-//			OF_EX_Latch.set_rs1(rs1);
-//			OF_EX_Latch.set_rs2(rs2);
-//			OF_EX_Latch.set_rd(rd);
-//			OF_EX_Latch.set_imm(imm);
+			OF_EX_Latch.set_rs1(rs1);
+			OF_EX_Latch.set_rs2(rs2);
+			OF_EX_Latch.set_rd(rd);
+			OF_EX_Latch.set_imm(imm);
 //			Obtain the original 32 bit string
 			String temp = String.format("%"+Integer.toString(32)+"s",Integer.toBinaryString(instruction)).replace(" ","0");
 			
@@ -111,23 +109,37 @@ public class OperandFetch {
 					System.out.println("rd -> "+rd);
 					System.out.println("imm -> "+imm);
 					
+					
+					
 					if(rd == rd_future1 & rd!=0) {
 						System.out.println("Conflict found on instruction -> "+opera+" with OF_EX");
-						containingProcessor.getRegisterFile().setWaitCounter(3);
+//						containingProcessor.getRegisterFile().setWaitCounter(true);
 						Simulator.dh++;
+						if(OF_EX_Latch.isEX_enable()){
+							
+							IF_EnableLatch.setIF_enable(false);
+							return;
+						}
 						
 					}
 					else if (rd == rd_future2 & rd!=0) {
 						System.out.println("Conflict found on instruction -> "+opera+" with EX_MA");
-						containingProcessor.getRegisterFile().setWaitCounter(2);
+//						containingProcessor.getRegisterFile().setWaitCounter(true);
 						Simulator.dh++;
-						
+						if(EX_MA_Latch.isMA_enable()){
+							System.out.println("aa gya");
+							IF_EnableLatch.setIF_enable(false);
+							return;
+						}
 					}
 					else if(rd == rd_future3 & rd!=0) {
 						System.out.println("Conflict found on instruction -> "+opera+" with MA_RW");
-						containingProcessor.getRegisterFile().setWaitCounter(1);
+//						containingProcessor.getRegisterFile().setWaitCounter(true);
 						Simulator.dh++;
-						
+						if(MA_RW_Latch.isRW_enable()){
+							IF_EnableLatch.setIF_enable(false);
+							return;
+						}
 					}
 					
 					
@@ -155,23 +167,36 @@ public class OperandFetch {
 					System.out.println("rs1 -> "+rs1);
 					System.out.println("rd -> "+rd);
 					System.out.println("imm -> "+imm);
+					
+					
 					if(rs1 == rd_future1 & rs1!=0 | rd==rd_future1 & rd!=0) {
 						System.out.println("Conflict found on instruction rs1 == rd_future1 -> "+opera+" with OF_EX");
-						containingProcessor.getRegisterFile().setWaitCounter(3);
+//						containingProcessor.getRegisterFile().setWaitCounter(true);
 						Simulator.dh++;
+						if(OF_EX_Latch.isEX_enable()){
+							IF_EnableLatch.setIF_enable(false);
+							return;
+						}
 						
 					}
 					else if (rs1 == rd_future2 & rs1!=0 | rd==rd_future2 & rd!=0) {
 						System.out.println("Conflict found on instruction rs1 == rd_future2 -> "+opera+" with EX_MA");
-						containingProcessor.getRegisterFile().setWaitCounter(2);
+//						containingProcessor.getRegisterFile().setWaitCounter(true);
 						Simulator.dh++;
+						if(EX_MA_Latch.isMA_enable() ){
+							IF_EnableLatch.setIF_enable(false);
+							return;
+						}
 						
 					}
 					else if(rs1 == rd_future3 & rs1!=0 | rd==rd_future3 & rd!=0) {
 						System.out.println("Conflict found on instruction rs1 == rd_future3 -> "+opera+ " with MA_RW");
-						containingProcessor.getRegisterFile().setWaitCounter(1);
+//						containingProcessor.getRegisterFile().setWaitCounter(true);
 						Simulator.dh++;
-						
+						if(MA_RW_Latch.isRW_enable()){
+							IF_EnableLatch.setIF_enable(false);
+							return;
+						}
 					}
 					
 					if (opera.equals("beq") | opera.equals("bne") | opera.equals("blt") | opera.equals("bgt"))
@@ -193,38 +218,53 @@ public class OperandFetch {
 					System.out.println("rs2 -> "+rs2);
 					System.out.println("rd -> "+rd);
 					
+					
 					if(rs1 == rd_future1 & rs1!=0| rs2 == rd_future1 & rs2!=0) {
 						System.out.println("Conflict found on instruction -> "+opera+" with OF_EX");
-						containingProcessor.getRegisterFile().setWaitCounter(3);
+//						containingProcessor.getRegisterFile().setWaitCounter(true);
 						Simulator.dh++;
+						if(OF_EX_Latch.isEX_enable() ){
+							IF_EnableLatch.setIF_enable(false);
+							return;
+						}
 						
 					}
 					else if (rs1 == rd_future2 & rs1!=0 | rs2 == rd_future2 & rs2!=0) {
 						System.out.println("Conflict found on instruction -> "+opera+" with EX_MA");
-						containingProcessor.getRegisterFile().setWaitCounter(2);
+//						containingProcessor.getRegisterFile().setWaitCounter(true);
 						Simulator.dh++;
+						if(EX_MA_Latch.isMA_enable()){
+							IF_EnableLatch.setIF_enable(false);
+							return;
+						}
 					}
 					else if(rs1 == rd_future3 & rs1!=0 | rs2 == rd_future3 & rs2!=0) {
 						System.out.println("Conflict found on instruction -> "+opera+" with MA_RW ");
-						containingProcessor.getRegisterFile().setWaitCounter(1);
+//						containingProcessor.getRegisterFile().setWaitCounter(true);
 						Simulator.dh++;
+						if(MA_RW_Latch.isRW_enable()){
+							IF_EnableLatch.setIF_enable(false);
+							return;
+						}
 					}
-					
 					
 					
 					OF_EX_Latch.set_rs1(rs1);
 					OF_EX_Latch.set_rs2(rs2);
 					OF_EX_Latch.set_rd(rd);
+					
 					break;
 			}
 			
+			OF_EX_Latch.setEX_enable(true);
 			IF_OF_Latch.setOF_enable(false); // OF will be shut down
-			if(containingProcessor.getRegisterFile().getWaitCounter()>0) { // If there's order to wait, we'll disable EX
-				OF_EX_Latch.setEX_enable(false);
-			}
-			else {
-				OF_EX_Latch.setEX_enable(true);
-			}
+			
+//			if (containingProcessor.getRegisterFile().getWaitCounter() == false) {
+//				OF_EX_Latch.setEX_enable(true);
+//			}
+//			else if(containingProcessor.getRegisterFile().getWaitCounter() == true) { // If there's order to wait, we'll disable EX
+//				
+//			}
 			
 			
 		}

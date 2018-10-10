@@ -9,24 +9,27 @@ import generic.*;
 public class InstructionFetch implements Element {
 	
 	Processor containingProcessor;
-	IF_EnableLatchType IF_EnableLatch;
+	public IF_EnableLatchType IF_EnableLatch;
 	IF_OF_LatchType IF_OF_Latch;
 	EX_IF_LatchType EX_IF_Latch;
+	OF_EX_LatchType OF_EX_Latch;
 	
-	
-	public InstructionFetch(Processor containingProcessor, IF_EnableLatchType iF_EnableLatch, IF_OF_LatchType iF_OF_Latch, EX_IF_LatchType eX_IF_Latch)
+	public InstructionFetch(Processor containingProcessor, IF_EnableLatchType iF_EnableLatch, IF_OF_LatchType iF_OF_Latch, EX_IF_LatchType eX_IF_Latch, OF_EX_LatchType oF_EX_Latch)
 	{
 		this.containingProcessor = containingProcessor;
 		this.IF_EnableLatch = iF_EnableLatch;
 		this.IF_OF_Latch = iF_OF_Latch;
 		this.EX_IF_Latch = eX_IF_Latch;
+		this.OF_EX_Latch = oF_EX_Latch;
 	}
 	
 	public void performIF()
 	{
+		System.out.println("Value of IF Enable - > "+ IF_EnableLatch.isIF_enable());
 		
-		if(IF_EnableLatch.isIF_enable() | EX_IF_Latch.isEX_IF())
+		if(IF_EnableLatch.isIF_enable() || EX_IF_Latch.isEX_IF())
 		{
+			
 			if(IF_EnableLatch.isIF_busy()) {
 				System.out.println("-----------IF STAGE BUSY HAI--------------");
 				return;
@@ -40,13 +43,11 @@ public class InstructionFetch implements Element {
 						this,
 						containingProcessor.getMainMemory(),
 						containingProcessor.getRegisterFile().getProgramCounter()
-					)
-				
+				)
 					
-				);
+			);
 			
 			IF_EnableLatch.setIF_busy(true);
-			IF_EnableLatch.setIF_enable(false);
 			
 			System.out.println("-----------IF STAGE GAYA--------------");
 			
@@ -55,8 +56,6 @@ public class InstructionFetch implements Element {
 			System.out.println("-----------IF STAGE KE BAHAR--------------");
 			
 		}
-		
-			
 		
 		
 	}	
@@ -68,10 +67,10 @@ public class InstructionFetch implements Element {
 	@Override
 	public void handleEvent(Event e)
 	{
-		if(IF_OF_Latch.isOF_busy())
+		
+		if(OF_EX_Latch.isEX_busy())
 		{
 			System.out.println("-----------IF STAGE KA HANDLE EVENT BUSY HAI--------------");
-			
 			e.setEventTime(Clock.getCurrentTime() + 1);
 			Simulator.getEventQueue().addEvent(e);
 		}
@@ -103,13 +102,16 @@ public class InstructionFetch implements Element {
 			int currentPC = containingProcessor.getRegisterFile().getProgramCounter();
 			containingProcessor.getRegisterFile().setProgramCounter(currentPC + 1);
 			
-			if(containingProcessor.getRegisterFile().getWaitCounter()>0) { // If there's order to wait, we'll disable EX
-				IF_OF_Latch.setOF_enable(false);
-			}
-			else {
-				IF_OF_Latch.setOF_enable(true);
-			}
+//			if(containingProcessor.getRegisterFile().getWaitCounter() == true) { // If there's order to wait, we'll disable EX
+//				IF_OF_Latch.setOF_enable(false);
+//			}
+//			else {
+//				IF_OF_Latch.setOF_enable(true);
+//			}
+			System.out.println("IF BUSY KO FALSE KIYA");
+			IF_OF_Latch.setOF_enable(true);
 			IF_EnableLatch.setIF_busy(false);
+//			IF_EnableLatch.setIF_enable(false);
 			System.out.println("-----------IF STAGE KE MANAGE EVENT BAHAR--------------");
 			
 		}
