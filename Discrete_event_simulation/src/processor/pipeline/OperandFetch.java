@@ -2,6 +2,8 @@ package processor.pipeline;
 import generic.Simulator;
 import java.math.BigInteger;
 
+import configuration.Configuration;
+import processor.Clock;
 import processor.Processor;
 
 public class OperandFetch {
@@ -32,8 +34,23 @@ public class OperandFetch {
 	
 	public void performOF()
 	{
+		if(Clock.getCurrentTime() == 86) {
+			operation_functions op = new operation_functions();
+			String opcode = EX_MA_Latch.getOpType();
+			String operation = op.getOperation(opcode);
+			System.out.println(operation+" IS THE MFKING OPERATION ON CYCLE 86 AND EX MA IS -> "+ EX_MA_Latch.isMA_enable());
+		}
+		
+		
 		if(IF_OF_Latch.isOF_enable())
 		{
+			
+			if(IF_OF_Latch.isOF_busy() || OF_EX_Latch.isEX_busy()) {
+				IF_OF_Latch.setOF_busy(true);
+				System.out.println("-----------OF STAGE IS BUSY OR EX STAGE IS BUSY--------------");
+				return;
+			}
+			
 			System.out.println("-----------OF STAGE AAYA--------------");
 			
 			
@@ -44,11 +61,11 @@ public class OperandFetch {
 			int rs2 = 0;
 			int rd = 0;
 			int imm = 0;
-			OF_EX_Latch.set_rs1(rs1);
-			OF_EX_Latch.set_rs2(rs2);
-			OF_EX_Latch.set_rd(rd);
-			OF_EX_Latch.set_imm(imm);
-			// Obtain the original 32 bit string
+//			OF_EX_Latch.set_rs1(rs1);
+//			OF_EX_Latch.set_rs2(rs2);
+//			OF_EX_Latch.set_rd(rd);
+//			OF_EX_Latch.set_imm(imm);
+//			Obtain the original 32 bit string
 			String temp = String.format("%"+Integer.toString(32)+"s",Integer.toBinaryString(instruction)).replace(" ","0");
 			
 			// Get OP code from the 32 bit string
@@ -118,6 +135,7 @@ public class OperandFetch {
 					OF_EX_Latch.set_rd(rd);
 					OF_EX_Latch.set_imm(imm);
 					break;
+					
 				case 2:
 					rs1 = calculate_value(temp.substring(5,10));
 					rd = calculate_value(temp.substring(10,15));

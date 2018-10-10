@@ -27,6 +27,13 @@ public class RegisterWrite {
 		int a=0;
 		if(MA_RW_Latch.isRW_enable())
 		{	
+			
+			if(EX_MA_Latch.isMA_busy())
+			{
+				System.out.println("-----------RW STAGE MEIN MA BUSY HAI--------------");
+				return;
+			}
+			
 			System.out.println("-----------RW STAGE AAYA--------------");
 			
 			
@@ -57,27 +64,26 @@ public class RegisterWrite {
 		}
 //		System.out.println(containingProcessor.getRegisterFile().getContentsAsString());
 //		System.out.println("--------------------------------------------");
-			MA_RW_Latch.setRW_enable(false);
-			if(a!=1) {
-				if(containingProcessor.getRegisterFile().getWaitCounter() > 0) {
-					System.out.println("WAITING!!!!"+ "  "+ containingProcessor.getRegisterFile().getWaitCounter());
-					containingProcessor.getRegisterFile().setWaitCounter(containingProcessor.getRegisterFile().getWaitCounter()-1);
-				}
-				else if(containingProcessor.getRegisterFile().getWaitCounter() == 0){
-					
-					IF_EnableLatch.setIF_enable(true);
-					IF_OF_Latch.setOF_enable(true);		
-					EX_MA_Latch.set_rd(0);
-					MA_RW_Latch.set_rd(0);
-					OF_EX_Latch.setEX_enable(true);
-					containingProcessor.getRegisterFile().setWaitCounter(containingProcessor.getRegisterFile().getWaitCounter()-1);		
-				}
-				else {
-					IF_EnableLatch.setIF_enable(true);
-				}
+		MA_RW_Latch.setRW_enable(false);
+		if(a!=1) {
+			if(containingProcessor.getRegisterFile().getWaitCounter() > 0) {
+				System.out.println("WAITING!!!!"+ "  "+ containingProcessor.getRegisterFile().getWaitCounter());
+				containingProcessor.getRegisterFile().setWaitCounter(containingProcessor.getRegisterFile().getWaitCounter()-1);
 			}
-			System.out.println("end PC in RW\\ "+containingProcessor.getRegisterFile().getProgramCounter()+"//");
-			System.out.println("-----------RW STAGE GAYA--------------");
+			else if(containingProcessor.getRegisterFile().getWaitCounter() == 0){
+				
+				IF_EnableLatch.setIF_enable(true);
+				IF_OF_Latch.setOF_enable(true);		
+				EX_MA_Latch.set_rd(0);
+				MA_RW_Latch.set_rd(0);
+				OF_EX_Latch.setEX_enable(true);
+				containingProcessor.getRegisterFile().setWaitCounter(containingProcessor.getRegisterFile().getWaitCounter()-1);		
+			}
+			else {
+				IF_EnableLatch.setIF_enable(true);
+			}
+		}
+		System.out.println("-----------RW STAGE GAYA--------------");
 			
 	}
 }

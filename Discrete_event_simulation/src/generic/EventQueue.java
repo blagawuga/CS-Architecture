@@ -1,6 +1,7 @@
 package generic;
 
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.PriorityQueue;
 
 import processor.Clock;
@@ -34,6 +35,18 @@ public class EventQueue {
 		}
 		else 
 			return false;
+	}
+	
+	public void printElements() {
+		// create iterator from the queue
+	      Iterator it = queue.iterator();
+
+	      System.out.println("Priority queue values are: ");
+	      
+	      while (it.hasNext()) {
+	    	 Event test = (Event) it.next();
+	         System.out.println("Current time -> : "+ Clock.getCurrentTime() +" Time Schedule -> : "+ test.getEventTime() + " Requesting Element -> : "+ test.getRequestingElement() + " Processing element -> : "+ test.getProcessingElement()); 
+	      }
 	}
 }
 
