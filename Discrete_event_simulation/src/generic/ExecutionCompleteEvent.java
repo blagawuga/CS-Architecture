@@ -6,8 +6,8 @@ public class ExecutionCompleteEvent extends Event {
 	int rs2;
 	int rd;
 	int imm;
-	int alu_Result;
 	String opcode;
+	int alu_Result;
 	
 	public ExecutionCompleteEvent(long eventTime, Element requestingElement, Element processingElement, int rs1, int rs2, int rd, int imm, int alu_Result, String opcode)
 	{
@@ -16,16 +16,8 @@ public class ExecutionCompleteEvent extends Event {
 		this.rs2 = rs2;
 		this.rd = rd;
 		this.imm = imm;
-		this.alu_Result = alu_Result;
 		this.opcode = opcode;
-	}
-	
-	public int getalu_Result() {
-		return alu_Result;
-	}
-	
-	public String getOpType() {
-		return opcode;
+		this.alu_Result = alu_Result;
 	}
 	
 	public int get_rs1() {
@@ -42,6 +34,14 @@ public class ExecutionCompleteEvent extends Event {
 	
 	public int get_rd() {
 		return rd;
+	}
+	
+	public String get_opcode() {
+		return opcode;
+	}
+	
+	public int getalu_Result() {
+		return alu_Result;
 	}
 
 }

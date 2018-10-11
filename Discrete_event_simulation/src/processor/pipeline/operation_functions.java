@@ -40,6 +40,7 @@ public class operation_functions {
 		operationType.put("11011", 2);
 		operationType.put("11100", 2);
 		operationType.put("11101", 1);
+		operationType.put("99999", 3);	
 		
 		// ---------------------------- //
 		
@@ -73,7 +74,7 @@ public class operation_functions {
 		operation.put("11011", "blt");
 		operation.put("11100", "bgt");
 		operation.put("11101", "end");
-		
+		operation.put("99999", "bubble");
 	}
 	
 	public int getOperationType(String opcode) {

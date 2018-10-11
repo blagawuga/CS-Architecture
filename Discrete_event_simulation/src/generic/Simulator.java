@@ -97,15 +97,8 @@ public class Simulator {
 			
 			processor.getRWUnit().performRW();
 			
-			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
-			Simulator.getEventQueue().printElements();
-			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END**********************************\n");
 			
 			processor.getMAUnit().performMA();
-			
-			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
-			Simulator.getEventQueue().printElements();
-			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END**********************************\n");
 			
 			
 			processor.getEXUnit().performEX();
@@ -117,6 +110,7 @@ public class Simulator {
 			System.out.println("~~~~~~~~~~~~~~~~~~~~~~CALLING PROCESS EVENTS START~~~~~~~~~~~~~~~~~~~~~~\n");
 			eventQueue.processEvents();
 			System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~CALLING PROCESS EVENTS END~~~~~~~~~~~~~~~~~~~~~~\n");
+			
 			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
 			Simulator.getEventQueue().printElements();
 			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END********************************\n");
@@ -124,24 +118,18 @@ public class Simulator {
 			
 			processor.getOFUnit().performOF();
 			
-			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
-			Simulator.getEventQueue().printElements();
-			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END********************************\n");
 			
 			
 			processor.getIFUnit().performIF();
 			
-			System.out.println("******************CONTENT OF PRIORITY QUEUE START********************************\n");
-			Simulator.getEventQueue().printElements();
-			System.out.println("\n******************CONTENT OF PRIORITY QUEUE END********************************\n");
 			
 			
 			Clock.incrementClock();
 			cycles++;
 			System.out.println("WHILE LOOP KHATAM");
 			System.out.println("---------------------------------------------------------------------------------\n\n");
-			if (cycles==150)
-				break;
+//			if (cycles==900)
+//				break;
 		}
 		System.out.println("Number of cycles "+cycles);
 		// TODO

@@ -11,26 +11,33 @@ public class Execute implements Element{
 	EX_MA_LatchType EX_MA_Latch;
 	EX_IF_LatchType EX_IF_Latch;
 	IF_OF_LatchType IF_OF_Latch;
-
+	MA_RW_LatchType MA_RW_Latch;
 	
-	public Execute(Processor containingProcessor, OF_EX_LatchType oF_EX_Latch, EX_MA_LatchType eX_MA_Latch, EX_IF_LatchType eX_IF_Latch,IF_OF_LatchType iF_OF_Latch)
+	public Execute(Processor containingProcessor, OF_EX_LatchType oF_EX_Latch, EX_MA_LatchType eX_MA_Latch, EX_IF_LatchType eX_IF_Latch,IF_OF_LatchType iF_OF_Latch, MA_RW_LatchType mA_RW_Latch)
 	{
 		this.IF_OF_Latch = iF_OF_Latch;
 		this.containingProcessor = containingProcessor;
 		this.OF_EX_Latch = oF_EX_Latch;
 		this.EX_MA_Latch = eX_MA_Latch;
 		this.EX_IF_Latch = eX_IF_Latch;
+		this.MA_RW_Latch = mA_RW_Latch;
 	}
 	
 	public void performEX()
 	{
-		
+			
 		if(OF_EX_Latch.isEX_enable())
 		{	
-			if(OF_EX_Latch.isEX_busy()) {
-				System.out.println("-----------EX STAGE IS BUSY--------------");
+			if(OF_EX_Latch.isEX_busy() ) {
+				IF_OF_Latch.setOF_busy(true);
+				System.out.println("-----------EX or MA STAGE IS BUSY--------------");
 				return;
 			}
+			else {
+				IF_OF_Latch.setOF_busy(false);
+			}
+			
+			
 			
 			Simulator.instructions_int++;
 			System.out.println("-----------EX STAGE AAYA--------------");
@@ -62,6 +69,7 @@ public class Execute implements Element{
 			
 			switch(operation) {
 			
+			
 			case "add":
 				
 				Simulator.getEventQueue().addEvent(
@@ -77,6 +85,7 @@ public class Execute implements Element{
 									opcode
 								)					
 				);
+				OF_EX_Latch.setEX_busy(true);
 				//EX_MA_Latch.setalu_Result(rs1val+rs2val);
 				break;
 				
@@ -95,7 +104,7 @@ public class Execute implements Element{
 									opcode
 								)					
 				);
-				
+				OF_EX_Latch.setEX_busy(true);
 				//EX_MA_Latch.setalu_Result(rs1val+imm);
 				break;
 				
@@ -114,6 +123,7 @@ public class Execute implements Element{
 									opcode
 								)					
 				);
+				OF_EX_Latch.setEX_busy(true);
 				//EX_MA_Latch.setalu_Result(rs1val-rs2val);
 				break;
 				
@@ -132,6 +142,7 @@ public class Execute implements Element{
 									opcode
 								)					
 				);
+				OF_EX_Latch.setEX_busy(true);
 				//EX_MA_Latch.setalu_Result(rs1val-imm);
 				break;
 				
@@ -150,6 +161,7 @@ public class Execute implements Element{
 									opcode
 								)					
 				);
+				OF_EX_Latch.setEX_busy(true);
 				//EX_MA_Latch.setalu_Result(rs1val*rs2val);
 				break;
 				
@@ -168,6 +180,7 @@ public class Execute implements Element{
 									opcode
 								)					
 				);
+				OF_EX_Latch.setEX_busy(true);
 				//EX_MA_Latch.setalu_Result(rs1val*imm);
 				break;
 				
@@ -186,6 +199,7 @@ public class Execute implements Element{
 									opcode
 								)					
 				);
+				containingProcessor.getRegisterFile().setValue(31, rs1val % rs2val);
 				OF_EX_Latch.setEX_busy(true);				
 				break;
 				
@@ -203,6 +217,7 @@ public class Execute implements Element{
 									opcode
 								)					
 				);
+				containingProcessor.getRegisterFile().setValue(31, rs1val % imm);
 				OF_EX_Latch.setEX_busy(true);
 				break;
 				
@@ -515,46 +530,66 @@ public class Execute implements Element{
 				//EX_MA_Latch.setalu_Result(Integer.parseInt(r1));
 				break;	
 			case "load":
-				EX_MA_Latch.set_imm(OF_EX_Latch.get_imm());//transfer the values from of ex latch to ex ma latch
-				EX_MA_Latch.set_op(OF_EX_Latch.getOpType());
-				EX_MA_Latch.set_rd(OF_EX_Latch.get_rd());
-				EX_MA_Latch.set_rs1(OF_EX_Latch.get_rs1());
-				EX_MA_Latch.set_rs2(OF_EX_Latch.get_rs2());
+				Simulator.getEventQueue().addEvent(
+						new ExecutionCompleteEvent (
+									Clock.getCurrentTime()+Configuration.ALU_latency,
+									this,
+									containingProcessor.getEXUnit(),
+									rs1,
+									rs2,
+									rd,
+									imm,
+									rs1val + imm,//alu_Result
+									opcode
+								)					
+				);
+				OF_EX_Latch.setEX_busy(true);
+				//EX_MA_Latch.setalu_Result(rs1val | rs2val);
 				break;
 				
 			case "store":
-				EX_MA_Latch.set_imm(OF_EX_Latch.get_imm());//transfer the values from of ex latch to ex ma latch
-				EX_MA_Latch.set_op(OF_EX_Latch.getOpType());
-				EX_MA_Latch.set_rd(OF_EX_Latch.get_rd());
-				EX_MA_Latch.set_rs1(OF_EX_Latch.get_rs1());
-				EX_MA_Latch.set_rs2(OF_EX_Latch.get_rs2());
+				Simulator.getEventQueue().addEvent(
+						new ExecutionCompleteEvent (
+									Clock.getCurrentTime()+Configuration.ALU_latency,
+									this,
+									containingProcessor.getEXUnit(),
+									rs1,
+									rs2,
+									rd,
+									imm,
+									rdval+imm,//alu_Result
+									opcode
+								)					
+				);
+				OF_EX_Latch.setEX_busy(true);
+				//EX_MA_Latch.setalu_Result(rs1val | rs2val);
 				break;
 				
 			case "jmp":
 				branchValue = OF_EX_Latch.get_BranchValue();
+				
 				containingProcessor.getRegisterFile().setProgramCounter(branchValue);
 				EX_IF_Latch.set_branchP(branchValue);
 				EX_IF_Latch.set_IsEXIF_Enable(true);
 				EX_MA_Latch.setMA_enable(false);
 				IF_OF_Latch.setOF_enable(false);
-				EX_MA_Latch.set_imm(OF_EX_Latch.get_imm());//transfer the values from of ex latch to ex ma latch
-				EX_MA_Latch.set_op(OF_EX_Latch.getOpType());
-				EX_MA_Latch.set_rd(OF_EX_Latch.get_rd());
-				EX_MA_Latch.set_rs1(OF_EX_Latch.get_rs1());
-				EX_MA_Latch.set_rs2(OF_EX_Latch.get_rs2());
+				OF_EX_Latch.setEX_enable(false);
+				Simulator.getEventQueue().deleteElements(Clock.getCurrentTime());
 				System.out.println("///////////branch hua\\\\\\");
 				Simulator.ch++;
 				break;
 				
 			case "beq":
 				EX_MA_Latch.setMA_enable(false);
-				
 				if (rs1val == rdval)
 				{
+					OF_EX_Latch.setEX_enable(false);
+					
 					Simulator.ch++;
 					branchValue = OF_EX_Latch.get_BranchValue();
 					containingProcessor.getRegisterFile().setProgramCounter(branchValue);
 					EX_IF_Latch.set_branchP(branchValue);
+					Simulator.getEventQueue().deleteElements(Clock.getCurrentTime());
 					EX_IF_Latch.set_IsEXIF_Enable(true);
 					IF_OF_Latch.setOF_enable(false);// wtd in case instruction to be overwritten is held back due to wait counter and till then beq moves from ex stage
 					System.out.println("///////////branch hua\\\\\\");
@@ -574,7 +609,10 @@ public class Execute implements Element{
 				EX_MA_Latch.setMA_enable(false);
 				if (rs1val != rdval)
 				{
+					OF_EX_Latch.setEX_enable(false);
+					EX_MA_Latch.setMA_enable(false);
 					Simulator.ch++;
+					Simulator.getEventQueue().deleteElements(Clock.getCurrentTime());
 					branchValue = OF_EX_Latch.get_BranchValue();
 					containingProcessor.getRegisterFile().setProgramCounter(branchValue);
 					EX_IF_Latch.set_branchP(branchValue);
@@ -598,6 +636,8 @@ public class Execute implements Element{
 				if (rs1val < rdval)
 				{
 					Simulator.ch++;
+					OF_EX_Latch.setEX_enable(false);
+					Simulator.getEventQueue().deleteElements(Clock.getCurrentTime());
 					branchValue = OF_EX_Latch.get_BranchValue();
 					containingProcessor.getRegisterFile().setProgramCounter(branchValue);
 					EX_IF_Latch.set_branchP(branchValue);
@@ -620,7 +660,10 @@ public class Execute implements Element{
 				EX_MA_Latch.setMA_enable(false);
 				if (rs1val > rdval)
 				{
+					
+					OF_EX_Latch.setEX_enable(false);
 					branchValue = OF_EX_Latch.get_BranchValue();
+					Simulator.getEventQueue().deleteElements(Clock.getCurrentTime());
 					containingProcessor.getRegisterFile().setProgramCounter(branchValue);
 					EX_IF_Latch.set_branchP(branchValue);
 					//System.out.println("tatti "+branchValue);
@@ -640,18 +683,22 @@ public class Execute implements Element{
 				EX_MA_Latch.set_rs1(OF_EX_Latch.get_rs1());
 				EX_MA_Latch.set_rs2(OF_EX_Latch.get_rs2());
 				break;
-			}
-			System.out.println(containingProcessor.getRegisterFile().getContentsAsString());
-			System.out.println("aluresult->"+EX_MA_Latch.getalu_Result());
-					
+			case "end":
+				System.out.println("Hey im in end");
+				EX_MA_Latch.set_imm(OF_EX_Latch.get_imm());//transfer the values from of ex latch to ex ma latch
+				EX_MA_Latch.set_op(OF_EX_Latch.getOpType());
+				EX_MA_Latch.set_rd(OF_EX_Latch.get_rd());
+				EX_MA_Latch.set_rs1(OF_EX_Latch.get_rs1());
+				EX_MA_Latch.set_rs2(OF_EX_Latch.get_rs2());
+				OF_EX_Latch.setEX_enable(false);
+				EX_MA_Latch.setMA_enable(true);
+				break;
+			}	
+				System.out.println(containingProcessor.getRegisterFile().getContentsAsString());
+				System.out.println("aluresult->"+EX_MA_Latch.getalu_Result());
 			
-		}
-		if(containingProcessor.getRegisterFile().getWaitCounter()>=0) { // If there's order to wait, we'll disable EX
-			EX_IF_Latch.set_IsEXIF_Enable(false);
-		}
-		
-
-		OF_EX_Latch.setEX_enable(false);
+			
+			}
 		
 
 		EX_MA_Latch.setend_PC(OF_EX_Latch.getend_PC());
@@ -675,6 +722,9 @@ public class Execute implements Element{
 		else
 		{
 			OF_EX_Latch.setEX_busy(false);
+			
+			EX_MA_Latch.setMA_enable(true);
+			OF_EX_Latch.setEX_enable(false);
 			System.out.println("-----------EX STAGE KA HANDLE EVENT AAYA--------------");
 			ExecutionCompleteEvent event = (ExecutionCompleteEvent) e;
 			EX_MA_Latch.setalu_Result(event.getalu_Result());

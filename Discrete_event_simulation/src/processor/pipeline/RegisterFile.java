@@ -3,14 +3,14 @@ package processor.pipeline;
 public class RegisterFile {
 	int[] registerFile;
 	int programCounter;
-	int wait_counter;
+	boolean wait;
 	//boolean end;
 	int wait_end;
 	public RegisterFile()
 	{
 		registerFile = new int[32];
 		registerFile[0]=0;			//%xo is always 0 [RISC V]
-		wait_counter = -1;
+		wait = false;
 	}
 	
 	public int getValue(int registerNumber)
@@ -59,14 +59,14 @@ public class RegisterFile {
 	}
 	
 	
-	public void setWaitCounter(int wait_counter)
+	public void setWaitCounter(boolean wait)
 	{
-		this.wait_counter = wait_counter;
+		this.wait = wait;
 	}
 	
-	public int getWaitCounter()
+	public boolean getWaitCounter()
 	{
-		return wait_counter;
+		return wait;
 	}
 	
 	public String getContentsAsString()

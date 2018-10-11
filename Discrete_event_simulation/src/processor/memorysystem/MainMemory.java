@@ -56,6 +56,16 @@ public class MainMemory implements Element {
 		{
 			MemoryWriteEvent event = (MemoryWriteEvent) e;
 			setWord(event.getAddressToWriteTo(), event.getValue());
+			Simulator.getEventQueue().addEvent(
+				new MemoryConfirmEvent(
+					
+							Clock.getCurrentTime(),
+							this,
+							event.getRequestingElement(),
+							true
+						)
+						
+				);
 		}
 	}
 	
